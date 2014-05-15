@@ -1,0 +1,22 @@
+{
+	"name": "vbuilder/utils",
+	"type": "library",
+	"description": "vBuilder Framework / Utils",
+	"keywords": ["vbuilder", "utils"],
+	"homepage": "http://www.vbuilder.cz",
+	"authors": [
+		{
+			"name": "V3Net.cz, s.r.o.",
+			"homepage": "http://www.v3net.cz"
+		}
+	],
+	"require": {
+		"php": ">=5.3.1"
+	},
+	"require-dev": {
+		"nette/tester": "~1.0"
+	},
+	"autoload": {
+		"classmap": ["src/"]
+	}
+}
