@@ -39,7 +39,10 @@ test(function() {
 	$rules = new KeyParser(array('name'));
 
 	$rules->addRule(function (Context $context) use ($structure) {
-		 return $context->value != $structure['name'];
+		 if($context->value != $structure['name'])
+		 	return TRUE;
+
+		 return 'Error';
 	});
 
 	$success = $rules->parse($context);

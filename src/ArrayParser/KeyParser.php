@@ -176,20 +176,12 @@ class KeyParser extends Nette\Object implements \IteratorAggregate {
 
 			} elseif (!$success && !$rule->branch) {
 
-				// Default message
-				if(!$result) {
-					$result = Strings::sprintf(
-						'Invalid parameter %key.',
-						array(
-							'key' => $context->printableKey,
-						)
+				if($result) {
+					$context->errors[] = array(
+						$context->absoluteKey,
+						$result
 					);
 				}
-
-				$context->errors[] = array(
-					$rule->key,
-					$result
-				);
 
 				return FALSE;
 			}

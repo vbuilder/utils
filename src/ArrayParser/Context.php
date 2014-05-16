@@ -46,6 +46,9 @@ class Context extends Nette\Object {
 	private $dirtyReference = FALSE;
 
 	/** @var array */
+	public $baseKey = array();
+
+	/** @var array */
 	public $errors = array();
 
 	public function __construct(array $data = array()) {
@@ -76,7 +79,7 @@ class Context extends Nette\Object {
 
 			$found = TRUE;
 			$ref = &$this->data;
-			foreach($this->rule->key as $k) {
+			foreach($this->absoluteKey as $k) {
 				if($ref === NULL) $ref = array();
 				if(!array_key_exists($k, $ref)) {
 					$found = FALSE;
@@ -97,8 +100,13 @@ class Context extends Nette\Object {
 		$this->value = $value;
 	}
 
+	public function getAbsoluteKey() {
+		return array_merge($this->baseKey, $this->rule->key);
+	}
+
 	public function getPrintableKey() {
-		return "['" . implode($this->rule->key, "', '") . "']";
+		$key = $this->absoluteKey;
+		return count($key) == 1 ? "'" . $key[0] . "'" : "['" . implode($key, "', '") . "']";
 	}
 
 }
