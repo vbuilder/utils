@@ -23,36 +23,40 @@
 
 namespace vBuilder\ArrayParser;
 
-use Nette;
+use vBuilder\Utils\Strings;
 
 /**
- * Validator rule
+ * Static helpers for value processing
  *
  * @author Adam Staněk (velbloud)
  * @since May 15, 2013
  */
-class Rule extends Nette\Object {
+class Filter {
 
-	const FILTER = 'filter';
-	const VALIDATOR = 'validator';
-	const CONDITION = 'condition';
+	public static function filterDefaultValue(Context $context, $arg) {
+		if($context->value === NULL)
+			$context->value = $arg;
 
-	/** @var string */
-	public $type;
+		return TRUE;
+	}
 
-	/** @var array */
-	public $key;
+	public static function filterSimplify(Context $context) {
+		$context->value = Strings::simplify($context->value);
 
-	/** @var mixed */
-	public $validator;
+		return TRUE;
+	}
 
-	/** @var array */
-	public $arguments;
+	public static function filterTrim(Context $context, $characterMask = " \t\n\r\0\x0B") {
+		$context->value = trim($context->value, $characterMask);
 
-	/** @var bool */
-	public $isNegative = FALSE;
+		return TRUE;
+	}
 
-	/** @var Rules  for conditions */
-	public $branch;
+	public static function filterSerialize(Context $context) {
+		$context->value = serialize($context->value);
+
+		return TRUE;
+	}
+
 
 }
