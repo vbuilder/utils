@@ -101,11 +101,11 @@ class Context extends Nette\Object {
 	}
 
 	public function getAbsoluteKey() {
-		return array_merge($this->baseKey, $this->rule->key);
+		return $this->rule ? array_merge($this->baseKey, $this->rule->key) : $this->baseKey;
 	}
 
-	public function getPrintableKey() {
-		$key = $this->absoluteKey;
+	public function getPrintableKey($key = NULL) {
+		$key = $key ?: $this->absoluteKey;
 		return count($key) == 1 ? "'" . $key[0] . "'" : "['" . implode($key, "', '") . "']";
 	}
 

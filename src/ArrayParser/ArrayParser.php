@@ -47,16 +47,16 @@ use vBuilder\Utils\Strings,
  * @author Adam Staněk (velbloud)
  * @since May 15, 2013
  */
-class ArrayParser extends Nette\Utils\ArrayHash {
+class ArrayParser extends Nette\ArrayHash {
 
-	/** Filters **/
+	/** Filters */
 	const DEFAULT_VALUE = ':filterDefaultValue';
 	const TRIM = ':filterTrim';
 	const SIMPLIFY = ':filterSimplify';
 	const SERIALIZE = ':filterSerialize';
 	/**/
 
-	/** Validators **/
+	/** Validators */
 	const REQUIRED = ':validateRequired';
 	const NOT_EMPTY = ':validateNotEmpty';
 
@@ -65,6 +65,11 @@ class ArrayParser extends Nette\Utils\ArrayHash {
 
 	const STRUCTURE = ':validateStructure';
 	const ARRAY_OF_STRUCTURE = ':validateArrayOfStructure';
+	/**/
+
+	/** Presets */
+	const NON_EMPTY_STRING = 'nonEmptyString';
+	const OPTIONAL_STRING = 'optionalString';
 	/**/
 
 	public function parse(array $data, &$errors = array()) {
@@ -85,10 +90,26 @@ class ArrayParser extends Nette\Utils\ArrayHash {
 
 		$context->baseKey = $baseKey;
 		$context->setRule();
+		$keys = is_array($context->value) ? array_flip(array_keys($context->value)) : array();
 
-		foreach($this as $rules) {
+		foreach($this as $k => $rules) {
+			unset($keys[$k]);
+
 			if(!$rules->parse($context))
 				$success = FALSE;
+		}
+
+		foreach($keys as $k => $v) {
+			$success = FALSE;
+			$key = $baseKey;
+			$key[] = $k;
+			$context->errors[] = array(
+				$key,
+				Strings::sprintf(
+					'Unexpected parameter %key.',
+					array('key' => $context->getPrintableKey($key))
+				)
+			);
 		}
 
 		$context->baseKey = $oldBaseKey;
@@ -97,9 +118,33 @@ class ArrayParser extends Nette\Utils\ArrayHash {
 		return $success;
 	}
 
-	public function addKey($key) {
+	public function addKey($key, $preset = NULL) {
+
 		if(!isset($this[$key]))
 			$this[$key] = new KeyParser(array($key));
+
+		switch($preset) {
+			case NULL:
+				break;
+
+			// Non-empty string
+			case self::NON_EMPTY_STRING:
+				$this[$key]->addRule(self::SCALAR);
+				$this[$key]->addFilter(self::SIMPLIFY);
+				$this[$key]->addRule(self::NOT_EMPTY);
+				break;
+
+			// NULL or non-empty string
+			case self::OPTIONAL_STRING:
+				$this[$key]->addRule(self::SCALAR);
+				$this[$key]->addFilter(self::SIMPLIFY);
+				$this[$key]->addCondition(self::REQUIRED)
+					->addRule(self::NOT_EMPTY);
+				break;
+
+			default:
+				throw new Nette\InvalidArgumentException("Invalid preset '$preset'");
+		}
 
 		return $this[$key];
 	}

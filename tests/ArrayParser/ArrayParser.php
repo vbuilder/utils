@@ -33,11 +33,23 @@ test(function() {
 		'surname' => NULL
 	);
 
-	$success = $validator->parse($structure, $errors);
+	$parsed = $validator->parse($structure, $errors);
 
-	Assert::false($success);
+	Assert::false($parsed);
 	Assert::type('array', $errors);
 	Assert::same(count($errors), 2);
+
+	$structure = array(
+		'name' => 'Jane',
+		'surname' => 'Doe',
+		'foo' => 123
+	);
+
+	$parsed = $validator->parse($structure, $errors);
+
+	Assert::false($parsed);
+	Assert::type('array', $errors);
+	Assert::same(count($errors), 1);
 
 });
 
@@ -165,6 +177,23 @@ test(function() {
 	Assert::equal($data, $parsed);
 
 	$data['messages'][] = 1234;
+	$parsed = $personParser->parse($data, $errors);
+	Assert::false($parsed);
+
+	$data = array(
+		'messages' => array(
+			array(
+				'a' => 'A1',
+				'b' => 'B1'
+			),
+			array(
+				'a' => 'A2',
+				'b' => 'B2',
+				'c' => 'surprise!'
+			)
+		)
+	);
+
 	$parsed = $personParser->parse($data, $errors);
 	Assert::false($parsed);
 

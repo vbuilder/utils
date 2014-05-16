@@ -22,6 +22,16 @@ test(function() {
 
 });
 
+// Get empty rule
+test(function() {
+
+	$context = new Context;
+	$context->data = array('a' => 1, 'b' => 2);
+
+	Assert::same($context->data, $context->value);
+
+});
+
 // Get reference
 test(function() {
 
