@@ -21,7 +21,7 @@
  * along with vBuilder FW. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace vBuilder\Validators;
+namespace vBuilder\ArrayParser;
 
 use vBuilder\Utils\Strings;
 
@@ -31,12 +31,18 @@ use vBuilder\Utils\Strings;
  * @author Adam Staněk (velbloud)
  * @since May 15, 2013
  */
-class Helpers {
+class Validator {
+
+	/** Helpers **/
+	const REQUIRED = ':required';
+	const IN_ARRAY = ':inArray';
+	const SCALAR = ':scalar';
+	/**/
 
 	public static $defaultMessages = array(
-		Validator::REQUIRED => 'Parameter %s is required.',
-		Validator::IN_ARRAY => 'Invalid value for parameter %s.',
-		Validator::SCALAR => 'Invalid value for parameter %s. Expected scalar.'
+		self::REQUIRED => 'Parameter %s is required.',
+		self::IN_ARRAY => 'Invalid value for parameter %s.',
+		self::SCALAR => 'Invalid value for parameter %s. Expected scalar.'
 	);
 
 	public static function validateRequired($value) {

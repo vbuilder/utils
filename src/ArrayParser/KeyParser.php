@@ -21,19 +21,19 @@
  * along with vBuilder FW. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace vBuilder\Validators;
+namespace vBuilder\ArrayParser;
 
 use Nette;
 
 /**
- * List of validation & condition rules.
+ * Key parser
  *
  * Inspired by Nette\Forms\Rules by David Grudl
  *
  * @author Adam Staněk (velbloud)
  * @since May 15, 2013
  */
-class Rules extends Nette\Object implements \IteratorAggregate {
+class KeyParser extends Nette\Object implements \IteratorAggregate {
 
 	/** @var Rule */
 	private $required;
@@ -47,11 +47,9 @@ class Rules extends Nette\Object implements \IteratorAggregate {
 	/** @var array */
 	private $key;
 
-
 	public function __construct(array $key) {
 		$this->key = $key;
 	}
-
 
 	/**
 	 * Makes key mandatory.
@@ -162,39 +160,38 @@ class Rules extends Nette\Object implements \IteratorAggregate {
 	}
 
 	/**
-	 * Validates against ruleset.
+	 * Performs processing and validation.
 	 *
 	 * @param array|object data structure as reference
 	 * @param array output array of error messages
 	 * @return bool
 	 */
-	public function validate(&$structure, array &$errors = array())
+	public function parse(&$structure, array &$errors = array())
 	{
 		foreach ($this as $rule) {
 
 			$found = TRUE;
 			$ref = &$structure;
 			foreach($rule->key as $k) {
+				if($ref === NULL) $ref = array();
 				if(!array_key_exists($k, $ref)) {
 					$found = FALSE;
-					break;
+					$ref[$k] = NULL;
 				}
 
 				$ref = &$ref[$k];
 			}
 
-			$value = $found ? $ref : NULL;
-
-			$success = (bool) call_user_func(self::getCallback($rule), $value, $rule->arg);
+			$success = (bool) call_user_func(self::getCallback($rule), &$ref, $rule->arg);
 			if($rule->isNegative) $success = !$success;
 
-			if ($success && $rule->branch && !$rule->branch->validate($structure, $errors)) {
+			if ($success && $rule->branch && !$rule->branch->parse($structure, $errors)) {
 				return FALSE;
 
 			} elseif (!$success && !$rule->branch) {
 				$errors[] = array(
 					$rule->key,
-					Helpers::formatMessage($rule, $value)
+					Validator::formatMessage($rule, $ref)
 				);
 
 				return FALSE;
@@ -240,7 +237,7 @@ class Rules extends Nette\Object implements \IteratorAggregate {
 	{
 		$op = $rule->validator;
 		if (is_string($op) && strncmp($op, ':', 1) === 0) {
-			return 'vBuilder\Validators\Helpers::validate' . ltrim($op, ':');
+			return __NAMESPACE__ . '\\Validator::validate' . ltrim($op, ':');
 		} else {
 			return $op;
 		}

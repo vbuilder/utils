@@ -21,9 +21,10 @@
  * along with vBuilder FW. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace vBuilder\Validators;
+namespace vBuilder;
 
 use vBuilder\Utils\Strings,
+	vBuilder\ArrayParser\KeyParser,
 	Nette;
 
 /**
@@ -32,28 +33,22 @@ use vBuilder\Utils\Strings,
  * @author Adam Staněk (velbloud)
  * @since May 15, 2013
  */
-class Validator extends Nette\Utils\ArrayHash {
+class ArrayParser extends Nette\Utils\ArrayHash {
 
-	/** Helpers **/
-	const REQUIRED = ':required';
-	const IN_ARRAY = ':inArray';
-	const SCALAR = ':scalar';
-	/**/
-
-	public function validate(&$structure, &$errors = array()) {
+	public function parse($structure, &$errors = array()) {
 		$success = TRUE;
 
 		foreach($this as $rules) {
-			if(!$rules->validate($structure, $errors))
+			if(!$rules->parse($structure, $errors))
 				$success = FALSE;
 		}
 
-		return $success;
+		return $success === FALSE ? FALSE : $structure;
 	}
 
 	public function addKey($key) {
 		if(!isset($this[$key]))
-			$this[$key] = new Rules(array($key));
+			$this[$key] = new KeyParser(array($key));
 
 		return $this[$key];
 	}
@@ -61,12 +56,12 @@ class Validator extends Nette\Utils\ArrayHash {
 	/**
 	 * Adds new rule.
 	 * @param  mixed
-	 * @param  vBuilder\Validators\Rules
+	 * @param  KeyParser
 	 * @return void
 	 */
 	public function offsetSet($index, $rule) {
-		if(!$rule instanceof Rules) {
-			throw new Nette\InvalidArgumentException('Argument must be vBuilder\Validators\Rules descendant.');
+		if(!$rule instanceof KeyParser) {
+			throw new Nette\InvalidArgumentException('Argument must be ' . __NAMESPACE__ . 'ArrayParser\\KeyParser descendant.');
 		}
 
 		parent::offsetSet($index, $rule);

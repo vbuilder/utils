@@ -21,7 +21,7 @@
  * along with vBuilder FW. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace vBuilder\Validators;
+namespace vBuilder\ArrayParser;
 
 use Nette;
 
