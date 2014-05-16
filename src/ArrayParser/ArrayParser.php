@@ -24,6 +24,7 @@
 namespace vBuilder;
 
 use vBuilder\Utils\Strings,
+	vBuilder\ArrayParser\Context,
 	vBuilder\ArrayParser\KeyParser,
 	Nette;
 
@@ -35,15 +36,35 @@ use vBuilder\Utils\Strings,
  */
 class ArrayParser extends Nette\Utils\ArrayHash {
 
-	public function parse($structure, &$errors = array()) {
+	/** Filters **/
+	const DEFAULT_VALUE = ':filterDefaultValue';
+	const TRIM = ':filterTrim';
+	const SIMPLIFY = ':filterSimplify';
+	const SERIALIZE = ':filterSerialize';
+	/**/
+
+	/** Validators **/
+	const REQUIRED = ':validateRequired';
+	const NOT_EMPTY = ':validateNotEmpty';
+
+	const SCALAR = ':validateScalar';
+	const ONE_OF = ':validateInArray';
+	/**/
+
+	public function parse($data, &$errors = array()) {
 		$success = TRUE;
 
+		/// @todo add translator
+		$context = new Context;
+		$context->data = $data;
+
 		foreach($this as $rules) {
-			if(!$rules->parse($structure, $errors))
+			if(!$rules->parse($context))
 				$success = FALSE;
 		}
 
-		return $success === FALSE ? FALSE : $structure;
+		$errors = $context->errors;
+		return $success === FALSE ? FALSE : $context->data;
 	}
 
 	public function addKey($key) {

@@ -26,53 +26,81 @@ namespace vBuilder\ArrayParser;
 use vBuilder\Utils\Strings;
 
 /**
- * Static helpers for Validator
+ * Static helpers for value validation
  *
  * @author Adam Staněk (velbloud)
  * @since May 15, 2013
  */
 class Validator {
 
-	/** Helpers **/
-	const REQUIRED = ':required';
-	const IN_ARRAY = ':inArray';
-	const SCALAR = ':scalar';
-	/**/
+	public static function validateRequired(Context $context, $message = NULL) {
+		if($context->value !== NULL)
+			return TRUE;
 
-	public static $defaultMessages = array(
-		self::REQUIRED => 'Parameter %s is required.',
-		self::IN_ARRAY => 'Invalid value for parameter %s.',
-		self::SCALAR => 'Invalid value for parameter %s. Expected scalar.'
-	);
-
-	public static function validateRequired($value) {
-		return $value !== NULL && $value !== array() && $value !== '';
+		return Strings::sprintf(
+			$message ?: 'Parameter %key is required.',
+			array('key' => $context->printableKey)
+		);
 	}
 
-	public static function validateScalar($value) {
-		return is_scalar($value);
+	/**
+	 * @note Spaces are considered not empty. Might want to addFilter(ArrayParser::TRIM) first
+	 */
+	public static function validateNotEmpty(Context $context, $message = NULL) {
+		if($context->value != '')
+			return TRUE;
+
+		return Strings::sprintf(
+			$message ?: 'Parameter %key can\'t be empty',
+			array('key' => $context->printableKey)
+		);
 	}
 
-	public static function validateInArray($value, $args) {
-		return in_array($value, $args);
+	public static function validateScalar(Context $context, $message = NULL) {
+		if(is_scalar($context->value))
+			return TRUE;
+
+		return Strings::sprintf(
+			$message ?: 'Invalid value for parameter %key. Expected scalar.',
+			array('key' => $context->printableKey)
+		);
 	}
 
-	public static function formatMessage(Rule $rule, $value) {
-		$message = $rule->message;
+	public static function validateInArray(Context $context) {
+		$args = count($context->rule->arguments) == 1 && is_array($context->rule->arguments[0])
+			? $context->rule->arguments[0] : $context->rule->arguments;
 
-		if($message === NULL && is_string($rule->validator) && isset(static::$defaultMessages[$rule->validator])) {
-			$message = static::$defaultMessages[$rule->validator];
+		if(in_array($context->value, $args))
+			return TRUE;
+
+		$enum = '';
+		for($i = 0; $i < count($args); $i++) {
+			if($i > 0) {
+				$enum .= $i + 1 < count($args)
+					? ', '
+					: ' or ';
+			}
+
+			$enum .= is_scalar($args[$i]) ? var_export($args[$i], TRUE) : gettype($args[$i]);
 		}
 
-		elseif($message == NULL) {
-			trigger_error("Missing validation message for key ['" . implode($rule->key, "', '") . "'].", E_USER_WARNING);
-			return ;
-		}
+		$value = is_scalar($context->value)
+			? 'value ' . var_export($context->value, TRUE)
+			: 'value';
 
-		return Strings::sprintf($message, array(
-			'key' => implode($rule->key, '.'),
-			'value' => $value
-		));
+		$message = 'Invalid %value for parameter %key.';
+		if(count($args) == 1) $message .= ' Expected one of %enum.';
+		elseif(count($args) == 2) $message .= ' Expected either %enum.';
+		elseif(count($args) > 2) $message .= ' Expected one of %enum.';
+
+		return Strings::sprintf(
+			$message,
+			array(
+				'value' => $value,
+				'key' => $context->printableKey,
+				'enum' => $enum
+			)
+		);
 	}
 
 }

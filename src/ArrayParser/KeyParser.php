@@ -23,7 +23,8 @@
 
 namespace vBuilder\ArrayParser;
 
-use Nette;
+use Nette,
+	vBuilder\Utils\Strings;
 
 /**
  * Key parser
@@ -35,9 +36,6 @@ use Nette;
  */
 class KeyParser extends Nette\Object implements \IteratorAggregate {
 
-	/** @var Rule */
-	private $required;
-
 	/** @var Rule[] */
 	private $rules = array();
 
@@ -47,56 +45,47 @@ class KeyParser extends Nette\Object implements \IteratorAggregate {
 	/** @var array */
 	private $key;
 
+	public static $helperClasses = array(
+		Rule::FILTER => 'vBuilder\ArrayParser\Filter',
+		Rule::VALIDATOR => 'vBuilder\ArrayParser\Validator',
+		Rule::CONDITION => 'vBuilder\ArrayParser\Validator'
+	);
+
 	public function __construct(array $key) {
 		$this->key = $key;
 	}
 
 	/**
-	 * Makes key mandatory.
-	 * @param  mixed  state or error message
-	 * @return self
-	 */
-	public function setRequired($value = TRUE)
-	{
-		if ($value) {
-			$this->addRule(Validator::REQUIRED, is_string($value) ? $value : NULL);
-		} else {
-			$this->required = NULL;
-		}
-		return $this;
-	}
-
-
-	/**
-	 * Is key mandatory?
-	 * @return bool
-	 */
-	public function isRequired()
-	{
-		return $this->required instanceof Rule ? !$this->required->isNegative : FALSE;
-	}
-
-
-	/**
 	 * Adds a validation rule for current key.
 	 * @param  mixed      rule type
-	 * @param  string     message to display for invalid data
 	 * @param  mixed      optional rule arguments
 	 * @return self
 	 */
-	public function addRule($validator, $message = NULL, $arg = NULL)
-	{
+	public function addRule($validator, $arg = NULL) {
 		$rule = new Rule;
+		$rule->type = Rule::VALIDATOR;
 		$rule->key = $this->key;
 		$rule->validator = $validator;
 		$this->adjustOperation($rule);
-		$rule->arg = $arg;
-		$rule->message = $message;
-		if ($rule->validator === Validator::REQUIRED) {
-			$this->required = $rule;
-		} else {
-			$this->rules[] = $rule;
-		}
+		$rule->arguments = array_slice(func_get_args(), 1);
+		$this->rules[] = $rule;
+		return $this;
+	}
+
+	/**
+	 * Adds a filter rule for current key.
+	 * @param  mixed      rule type
+	 * @param  mixed      optional rule arguments
+	 * @return self
+	 */
+	public function addFilter($filter, $arg = NULL) {
+		$rule = new Rule;
+		$rule->type = Rule::FILTER;
+		$rule->key = $this->key;
+		$rule->validator = $filter;
+		$this->adjustOperation($rule);
+		$rule->arguments = array_slice(func_get_args(), 1);
+		$this->rules[] = $rule;
 		return $this;
 	}
 
@@ -109,7 +98,10 @@ class KeyParser extends Nette\Object implements \IteratorAggregate {
 	 */
 	public function addCondition($validator, $arg = NULL)
 	{
-		return $this->addConditionOn($this->key, $validator, $arg);
+		$args = func_get_args();
+		array_unshift($args, $this->key);
+
+		return call_user_func_array(array($this, 'addConditionOn'), $args);
 	}
 
 
@@ -123,10 +115,11 @@ class KeyParser extends Nette\Object implements \IteratorAggregate {
 	public function addConditionOn($key, $validator, $arg = NULL)
 	{
 		$rule = new Rule;
+		$rule->type = Rule::CONDITION;
 		$rule->key = $key;
 		$rule->validator = $validator;
 		$this->adjustOperation($rule);
-		$rule->arg = $arg;
+		$rule->arguments = array_slice(func_get_args(), 1);
 		$rule->branch = new static($this->key);
 		$rule->branch->parent = $this;
 
@@ -162,36 +155,40 @@ class KeyParser extends Nette\Object implements \IteratorAggregate {
 	/**
 	 * Performs processing and validation.
 	 *
-	 * @param array|object data structure as reference
-	 * @param array output array of error messages
+	 * @param Context
 	 * @return bool
 	 */
-	public function parse(&$structure, array &$errors = array())
+	public function parse(Context $context)
 	{
 		foreach ($this as $rule) {
 
-			$found = TRUE;
-			$ref = &$structure;
-			foreach($rule->key as $k) {
-				if($ref === NULL) $ref = array();
-				if(!array_key_exists($k, $ref)) {
-					$found = FALSE;
-					$ref[$k] = NULL;
-				}
+			$context->rule = $rule;
 
-				$ref = &$ref[$k];
-			}
+			$args = $rule->arguments;
+			array_unshift($args, $context);;
+			$result = call_user_func_array(self::getCallback($rule), $args);
 
-			$success = (bool) call_user_func(self::getCallback($rule), &$ref, $rule->arg);
+			$success = $result === TRUE;
 			if($rule->isNegative) $success = !$success;
 
-			if ($success && $rule->branch && !$rule->branch->parse($structure, $errors)) {
+			if ($success && $rule->branch && !$rule->branch->parse($context)) {
 				return FALSE;
 
 			} elseif (!$success && !$rule->branch) {
-				$errors[] = array(
+
+				// Default message
+				if(!$result) {
+					$result = Strings::sprintf(
+						'Invalid parameter %key.',
+						array(
+							'key' => $context->printableKey,
+						)
+					);
+				}
+
+				$context->errors[] = array(
 					$rule->key,
-					Validator::formatMessage($rule, $ref)
+					$result
 				);
 
 				return FALSE;
@@ -204,13 +201,8 @@ class KeyParser extends Nette\Object implements \IteratorAggregate {
 	 * Iterates over complete ruleset.
 	 * @return \ArrayIterator
 	 */
-	public function getIterator()
-	{
-		$rules = $this->rules;
-		if ($this->required) {
-			array_unshift($rules, $this->required);
-		}
-		return new \ArrayIterator($rules);
+	public function getIterator() {
+		return new \ArrayIterator($this->rules);
 	}
 
 
@@ -227,20 +219,20 @@ class KeyParser extends Nette\Object implements \IteratorAggregate {
 		}
 
 		if (!is_callable($this->getCallback($rule))) {
-			$validator = is_scalar($rule->validator) ? " '$rule->validator'" : '';
-			throw new Nette\InvalidArgumentException("Unknown validator$validator for key ['" . implode($rule->key, "', '") . "'].");
+			$validator = is_scalar($rule->validator) ? "'$rule->validator'" : '';
+			throw new Nette\InvalidArgumentException("Unknown callback $validator for key ['" . implode($rule->key, "', '") . "'].");
 		}
 	}
 
 
-	private static function getCallback($rule)
-	{
+	private static function getCallback($rule) {
 		$op = $rule->validator;
 		if (is_string($op) && strncmp($op, ':', 1) === 0) {
-			return __NAMESPACE__ . '\\Validator::validate' . ltrim($op, ':');
+			return static::$helperClasses[$rule->type] . '::' . ltrim($op, ':');
 		} else {
 			return $op;
 		}
+		return $rule->validator;
 	}
 
 }
