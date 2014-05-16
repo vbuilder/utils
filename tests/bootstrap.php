@@ -3,11 +3,26 @@
 // The Nette Tester command-line runner can be
 // invoked through the command: ../vendor/bin/tester .
 
-if (@!include __DIR__ . '/../vendor/autoload.php') {
+$autoloadSearchPath = array(
+	// Only vBuilder Utils and Composer
+	__DIR__ . '/../vendor/autoload.php',
+
+	// In Composer project
+	__DIR__ . '/../../../autoload.php'
+);
+
+foreach($autoloadSearchPath as $curr) {
+	if(file_exists($curr)) {
+		require $curr;
+		unset($autoloadSearchPath);
+		break;
+	}
+}
+
+if(isset($autoloadSearchPath)) {
 	echo 'Install Nette Tester using `composer update --dev`';
 	exit(1);
 }
-
 
 // configure environment
 Tester\Environment::setup();
