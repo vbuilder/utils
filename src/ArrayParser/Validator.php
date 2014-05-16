@@ -108,4 +108,24 @@ class Validator {
 		return $nestedParser->parseContext($context, $context->absoluteKey);
 	}
 
+	public static function validateArrayOfStructure(Context $context, vBuilder\ArrayParser $nestedParser) {
+		if(!is_array($context->value)) {
+			return Strings::sprintf(
+				'Invalid value for parameter %key. Expected array.',
+				array('key' => $context->printableKey)
+			);
+		}
+
+		$success = TRUE;
+		foreach($context->value as $k => $v) {
+			$key = $context->absoluteKey;
+			$key[] = $k;
+
+			if(!$nestedParser->parseContext($context, $key))
+				$success = FALSE;
+		}
+
+		return $success;
+	}
+
 }

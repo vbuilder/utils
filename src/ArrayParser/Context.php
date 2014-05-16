@@ -80,7 +80,7 @@ class Context extends Nette\Object {
 			$found = TRUE;
 			$ref = &$this->data;
 			foreach($this->absoluteKey as $k) {
-				if($ref === NULL) $ref = array();
+				if(!is_array($ref)) $ref = array();
 				if(!array_key_exists($k, $ref)) {
 					$found = FALSE;
 					$ref[$k] = NULL;

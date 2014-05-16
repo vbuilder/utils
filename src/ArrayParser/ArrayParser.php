@@ -31,6 +31,19 @@ use vBuilder\Utils\Strings,
 /**
  * Validator
  *
+ * Usage:
+ * <code>
+ * $parser = new ArrayParser;
+ * $parser->addKey('name')
+ * 	->addRule(ArrayParser::SCALAR)
+ * 	->addFilter(ArrayParser::SIMPLIFY);
+ * $parser->addKey('role')
+ *  ->addFilter(ArrayParser::DEFAULT_VALUE, 'user')
+ * 	->addRule(ArrayParser::ONE_OF, array('admin', 'user'));
+ *
+ * $parsed = $parser->parse($data, $errors);
+ * </code>
+ *
  * @author Adam Staněk (velbloud)
  * @since May 15, 2013
  */
@@ -51,6 +64,7 @@ class ArrayParser extends Nette\Utils\ArrayHash {
 	const ONE_OF = ':validateInArray';
 
 	const STRUCTURE = ':validateStructure';
+	const ARRAY_OF_STRUCTURE = ':validateArrayOfStructure';
 	/**/
 
 	public function parse(array $data, &$errors = array()) {
