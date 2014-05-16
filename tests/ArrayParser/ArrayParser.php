@@ -5,6 +5,7 @@ use vBuilder\ArrayParser,
 
 require __DIR__ . '/../bootstrap.php';
 
+// Simple validator
 test(function() {
 
 	$structure = array(
@@ -40,6 +41,8 @@ test(function() {
 
 });
 
+
+// Simple filter
 test(function() {
 
 	$validator = new ArrayParser;
@@ -52,15 +55,16 @@ test(function() {
 
 });
 
+// Conditional
 test(function() {
 
 	$validator = new ArrayParser;
 	$validator->addKey('data')
 		->addCondition(ArrayParser::SCALAR)
-			->AddFilter(ArrayParser::SIMPLIFY)
-			->AddRule(ArrayParser::NOT_EMPTY)
+			->addFilter(ArrayParser::SIMPLIFY)
+			->addRule(ArrayParser::NOT_EMPTY)
 		->elseCondition()
-			->AddFilter(ArrayParser::SERIALIZE);
+			->addFilter(ArrayParser::SERIALIZE);
 
 	$structure = array('data' => ' hello   world  ');
 	$parsed = $validator->parse($structure, $errors);
@@ -75,4 +79,55 @@ test(function() {
 	Assert::equal(array('data' => 'a:1:{s:1:"a";i:1;}'), $parsed);
 
 });
+
+// Nested
+test(function() {
+
+	$addressParser = new ArrayParser;
+
+	$addressParser->addKey('street')
+		->addRule(ArrayParser::SCALAR)
+		->addFilter(ArrayParser::SIMPLIFY)
+		->addRule(ArrayParser::NOT_EMPTY);
+
+	$addressParser->addKey('city')
+		->addRule(ArrayParser::SCALAR)
+		->addFilter(ArrayParser::SIMPLIFY)
+		->addRule(ArrayParser::NOT_EMPTY);
+
+	$personParser  = new ArrayParser;
+
+	$personParser->addKey('name')
+		->addRule(ArrayParser::SCALAR)
+		->addFilter(ArrayParser::SIMPLIFY)
+		->addRule(ArrayParser::NOT_EMPTY);
+
+	$personParser->addKey('address')
+		->addRule(ArrayParser::STRUCTURE, $addressParser);
+
+	$data = array(
+		'name' => 'Jane Doe',
+		'address' => array(
+			'street' => 'Blue Street 42',
+			'city' => 'Boston'
+		)
+	);
+
+	$parsed = $personParser->parse($data);
+	Assert::equal($data, $parsed);
+
+	$data = array(
+		'name' => 'Jane Doe',
+		'address' => array(
+			'street' => 'Blue Street 42',
+			'city' => ''
+		)
+	);
+
+	$parsed = $personParser->parse($data, $errors);
+	Assert::false($parsed);
+});
+
+
+
 

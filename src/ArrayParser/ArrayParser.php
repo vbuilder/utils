@@ -49,22 +49,38 @@ class ArrayParser extends Nette\Utils\ArrayHash {
 
 	const SCALAR = ':validateScalar';
 	const ONE_OF = ':validateInArray';
+
+	const STRUCTURE = ':validateStructure';
 	/**/
 
-	public function parse($data, &$errors = array()) {
-		$success = TRUE;
+	public function parse(array $data, &$errors = array()) {
 
 		/// @todo add translator
-		$context = new Context;
-		$context->data = $data;
+		$context = new Context($data);
+		$success = $this->parseContext($context);
+
+		$errors = $context->errors;
+		return $success === FALSE ? FALSE : $context->data;
+	}
+
+	public function parseContext(Context $context, $baseKey = array()) {
+		$success = TRUE;
+
+		$oldBaseKey = $context->baseKey;
+		$oldRule = $context->rule;
+
+		$context->baseKey = $baseKey;
+		$context->setRule();
 
 		foreach($this as $rules) {
 			if(!$rules->parse($context))
 				$success = FALSE;
 		}
 
-		$errors = $context->errors;
-		return $success === FALSE ? FALSE : $context->data;
+		$context->baseKey = $oldBaseKey;
+		$context->rule = $oldRule;
+
+		return $success;
 	}
 
 	public function addKey($key) {

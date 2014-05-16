@@ -23,7 +23,8 @@
 
 namespace vBuilder\ArrayParser;
 
-use vBuilder\Utils\Strings;
+use vBuilder,
+	vBuilder\Utils\Strings;
 
 /**
  * Static helpers for value validation
@@ -101,6 +102,10 @@ class Validator {
 				'enum' => $enum
 			)
 		);
+	}
+
+	public static function validateStructure(Context $context, vBuilder\ArrayParser $nestedParser) {
+		return $nestedParser->parseContext($context, $context->absoluteKey);
 	}
 
 }
