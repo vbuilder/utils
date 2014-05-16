@@ -1,7 +1,6 @@
 <?php
 
-use vBuilder\Validators\Validator,
-	vBuilder\Validators\Rules,
+use vBuilder\ArrayParser\KeyParser,
 	Tester\Assert;
 
 require __DIR__ . '/../bootstrap.php';
@@ -14,14 +13,14 @@ test(function() {
 		'surname' => 'Doe'
 	);
 
-	$rules = new Rules(array('name'));
+	$rules = new KeyParser(array('name'));
 
 	$rules->addRule(function ($value) use ($structure) {
 		 return $value == $structure['name'];
 	}, 'msg');
 
 	$errors = array();
-	$success = $rules->validate($structure, $errors);
+	$success = $rules->parse($structure, $errors);
 
 	Assert::true($success);
 	Assert::type('array', $errors);
@@ -37,14 +36,14 @@ test(function() {
 		'surname' => 'Doe'
 	);
 
-	$rules = new Rules(array('name'));
+	$rules = new KeyParser(array('name'));
 
 	$rules->addRule(function ($value) use ($structure) {
 		 return $value != $structure['name'];
 	}, 'msg');
 
 	$errors = array();
-	$success = $rules->validate($structure, $errors);
+	$success = $rules->parse($structure, $errors);
 
 	Assert::false($success);
 	Assert::type('array', $errors);
@@ -61,14 +60,14 @@ test(function() {
 		)
 	);
 
-	$rules = new Rules(array('address', 'street'));
+	$rules = new KeyParser(array('address', 'street'));
 
 	$rules->addRule(function ($value) use ($structure) {
 		 return $value == $structure['address']['street'];
 	}, 'msg');
 
 	$errors = array();
-	$success = $rules->validate($structure, $errors);
+	$success = $rules->parse($structure, $errors);
 
 	Assert::true($success);
 	Assert::type('array', $errors);
@@ -84,35 +83,54 @@ test(function() {
 		'data' => 'A',
 	);
 
-	$rules = new Rules(array('data'));
+	$rules = new KeyParser(array('data'));
 	$rules
 		->addConditionOn(array('type'), function ($value) { return $value == 1; })
 			->addRule(function ($value) { return $value == 'A'; }, 'msg')
 		->endCondition()
 			->addRule(function ($value) { return is_string($value); }, 'msg');
 
-	Assert::true($rules->validate($structure));
+	Assert::true($rules->parse($structure));
 
 	$structure['data'] = 'B';
-	Assert::false($rules->validate($structure));
+	Assert::false($rules->parse($structure));
 
 	$structure['type'] = '2';
-	Assert::true($rules->validate($structure));
+	Assert::true($rules->parse($structure));
 
-	$rules = new Rules(array('data'));
+	$rules = new KeyParser(array('data'));
 	$rules
 		->addConditionOn(array('type'), function ($value) { return $value == 1; })
 			->addRule(function ($value) { return $value == 'A'; }, 'ifTrueRule')
 		->elseCondition()
 			->addRule(function ($value) { return $value == 'B'; }, 'ifFalseRule');
 
-	Assert::true($rules->validate($structure));
+	Assert::true($rules->parse($structure));
 
 	$structure['type'] = '1';
-	Assert::false($rules->validate($structure));
+	Assert::false($rules->parse($structure));
 
 	$structure['data'] = 'A';
-	Assert::true($rules->validate($structure));
+	Assert::true($rules->parse($structure));
+
+});
+
+// Test auto key creation
+test(function() {
+
+	$structure = array();
+
+	$rules = new KeyParser(array('address', 'street'));
+
+	$rules->addRule(function (&$value) {
+		$value = 'Main Street';
+		return TRUE;
+
+	}, 'msg');
+
+	$parsed = $rules->parse($structure);
+
+	Assert::equal(array('address' => array('street' => 'Main Street')), $structure);
 
 });
 
