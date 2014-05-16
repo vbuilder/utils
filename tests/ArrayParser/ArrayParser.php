@@ -128,6 +128,50 @@ test(function() {
 	Assert::false($parsed);
 });
 
+// Array
+test(function() {
+
+	$nestedParser = new ArrayParser;
+
+	$nestedParser->addKey('a')
+		->addRule(ArrayParser::SCALAR)
+		->addFilter(ArrayParser::SIMPLIFY)
+		->addRule(ArrayParser::NOT_EMPTY);
+
+	$nestedParser->addKey('b')
+		->addRule(ArrayParser::SCALAR)
+		->addFilter(ArrayParser::SIMPLIFY)
+		->addRule(ArrayParser::NOT_EMPTY);
+
+	$personParser  = new ArrayParser;
+
+	$personParser->addKey('messages')
+		->addRule(ArrayParser::ARRAY_OF_STRUCTURE, $nestedParser);
+
+	$data = array(
+		'messages' => array(
+			array(
+				'a' => 'A1',
+				'b' => 'B1'
+			),
+			array(
+				'a' => 'A2',
+				'b' => 'B2'
+			)
+		)
+	);
+
+	$parsed = $personParser->parse($data, $errors);
+	Assert::equal($data, $parsed);
+
+	$data['messages'][] = 1234;
+	$parsed = $personParser->parse($data, $errors);
+	Assert::false($parsed);
+
+});
+
+
+
 
 
 
