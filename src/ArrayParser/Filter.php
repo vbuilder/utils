@@ -41,19 +41,22 @@ class Filter {
 	}
 
 	public static function filterSimplify(Context $context) {
-		$context->value = Strings::simplify($context->value);
+		if($context->value !== NULL)
+			$context->value = Strings::simplify($context->value);
 
 		return TRUE;
 	}
 
 	public static function filterTrim(Context $context, $characterMask = " \t\n\r\0\x0B") {
-		$context->value = trim($context->value, $characterMask);
+		if($context->value !== NULL)
+			$context->value = trim($context->value, $characterMask);
 
 		return TRUE;
 	}
 
 	public static function filterSerialize(Context $context) {
-		$context->value = serialize($context->value);
+		if($context->value !== NULL)
+			$context->value = serialize($context->value);
 
 		return TRUE;
 	}

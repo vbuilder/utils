@@ -58,7 +58,7 @@ class Validator {
 	}
 
 	public static function validateScalar(Context $context, $message = NULL) {
-		if(is_scalar($context->value))
+		if($context->value === NULL || is_scalar($context->value))
 			return TRUE;
 
 		return Strings::sprintf(
