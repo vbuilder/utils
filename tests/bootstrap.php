@@ -15,6 +15,7 @@ foreach($autoloadSearchPath as $curr) {
 	if(file_exists($curr)) {
 		require $curr;
 		unset($autoloadSearchPath);
+		$autoloadPath = $curr;
 		break;
 	}
 }
