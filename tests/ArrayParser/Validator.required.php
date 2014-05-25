@@ -1,6 +1,6 @@
 <?php
 
-use vBuilder\ArrayParser,
+use vBuilder\ArrayParser\ArrayParser,
 	vBuilder\ArrayParser\Context,
 	vBuilder\ArrayParser\KeyParser,
 	Tester\Assert;

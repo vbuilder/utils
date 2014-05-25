@@ -1,6 +1,6 @@
 <?php
 
-use vBuilder\ArrayParser,
+use vBuilder\ArrayParser\ArrayParser,
 	Tester\Assert;
 
 require __DIR__ . '/../bootstrap.php';
