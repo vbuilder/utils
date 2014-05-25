@@ -24,6 +24,7 @@
 namespace vBuilder\Scheduler;
 
 use vBuilder,
+	vBuilder\Utils\FileSystem,
 	Nette,
 	Nette\Utils\Finder;
 
@@ -55,14 +56,9 @@ class JobStorage extends Nette\Object {
 	/**
 	 * @param string path to directory
 	 * @return self
-	 * @throws Nette\DirectoryNotFoundException if directory does not exist
 	 */
 	public function setDirectory($dir) {
-		$this->dir = realpath($dir);
-
-		if($this->dir === FALSE)
-			throw new Nette\DirectoryNotFoundException("Directory '$dir' not found.");
-
+		$this->dir = $dir;
 		return $this;
 	}
 
@@ -95,6 +91,9 @@ class JobStorage extends Nette\Object {
 	 * @return string|FALSE absolute path to job file or FALSE on failure
 	 */
 	public function createJob($name, array $metadata, $phpCode) {
+
+		FileSystem::createDirIfNotExists($this->dir);
+
 		$path = $this->dir . '/' . self::FILENAME_PREFIX . $name . '.' . md5($phpCode) . self::FILENAME_SUFFIX;
 		$result = $this->getFileStorage()->write($path, $metadata, "<?php\n" . $phpCode);
 
@@ -109,15 +108,17 @@ class JobStorage extends Nette\Object {
 	public function getJobs() {
 		$jobs = array();
 
-		$files = Finder::findFiles(self::FILENAME_PREFIX . '*' . self::FILENAME_SUFFIX)->in($this->dir);
-		foreach($files as $fileInfo) {
-			$name = substr($fileInfo->getFilename(), strlen(self::FILENAME_PREFIX), 0 - strlen(self::FILENAME_SUFFIX));
-			$name = preg_replace('#\\..*#', '', $name);
+		if(is_dir($this->dir)) {
+			$files = Finder::findFiles(self::FILENAME_PREFIX . '*' . self::FILENAME_SUFFIX)->in($this->dir);
+			foreach($files as $fileInfo) {
+				$name = substr($fileInfo->getFilename(), strlen(self::FILENAME_PREFIX), 0 - strlen(self::FILENAME_SUFFIX));
+				$name = preg_replace('#\\..*#', '', $name);
 
-			if(!isset($jobs[$name]))
-				$jobs[$name] = array($fileInfo->getPathname());
-			else
-				$jobs[$name][] = $fileInfo->getPathname();
+				if(!isset($jobs[$name]))
+					$jobs[$name] = array($fileInfo->getPathname());
+				else
+					$jobs[$name][] = $fileInfo->getPathname();
+			}
 		}
 
 		return $jobs;

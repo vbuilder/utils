@@ -24,6 +24,7 @@
 namespace vBuilder\Scheduler;
 
 use vBuilder,
+	vBuilder\Utils\FileSystem,
 	Nette;
 
 /**
@@ -101,7 +102,7 @@ class Runner extends Nette\Object {
 			unlink($jobScript);
 		} else {
 			$dir = $this->storage->directory . '/failed';
-			if(!is_dir($dir)) mkdir($dir);
+			FileSystem::createDirIfNotExists($dir);
 
 			rename($jobScript, $dir . '/' . basename($jobScript));
 		}
