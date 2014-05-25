@@ -1,0 +1,8 @@
+services:
+	scheduler:
+		class: vBuilder\Scheduler\Scheduler
+		arguments: [ '%appDir%/bootstrap.php', @scheduler.jobStorage ]
+
+	scheduler.jobStorage:
+		class: vBuilder\Scheduler\JobStorage
+		arguments: [ '%tempDir%/jobs' ]

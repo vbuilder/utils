@@ -22,6 +22,9 @@
 			"vBuilder\\": "src/"
 		}
 	},
+	"bin": [
+		"bin/job-runner"
+	],
 	"extra": {
 		"branch-alias": {
 			"dev-master": "1.0.x-dev"
