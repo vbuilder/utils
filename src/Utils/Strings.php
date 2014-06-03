@@ -169,63 +169,6 @@ class Strings extends Nette\Utils\Strings {
 				: array($parsed[0], array());
 	}
 
-	/**
-	 * Parses TRUE or FALSE strings into their boolean representation
-	 *
-	 * @param string
-	 * @param mixed value, which will be returned if given string can't be parsed into boolean
-	 * @return bool
-	 */
-	public static function parseToBool($str, $onFailValue = NULL) {
-		if(strcasecmp($str, 'true') == 0) return true;
-		elseif(strcasecmp($str, 'false') == 0) return false;
-
-		return $onFailValue;
-	}
-
-	/**
-	 * Parses numeric string into FLOAT variable.
-	 * Automatically converts decimal comma into dot and removes any spaces
-	 * and other non-numeric chars.
-	 *
-	 * If given string does not contain any number $onFailValue is returned.
-	 *
-	 * Tested for: "1,231.123", "-13", "1,22", "0", "", "+13.22",
-	 *		"123,122,123", "123 122,123", "some garbage 11.3 some other garbage",
-	 *		".12", ",12", "123.123.123", "123.123,12"
-	 *
-	 * @param string
-	 * @param mixed value, which will be returned if given string can't be parsed into float
-	 *
-	 * @return float|NULL
-	 */
-	public static function parseToFloat($str, $onFailValue = NULL) {
-
-		if(preg_match_all("/([^0-9]+)?([0-9]+)/", $str, $matches)) {
-
-			$sgn = strpos($matches[1][0], '-') !== FALSE ? -1 : 1;
-			$point = -1;
-			$commaCount = 0;
-			$dotCount = 0;
-			foreach($matches[1] as $key=>$sep) {
-				if(strpos($sep, '.') !== FALSE)
-					$point = ++$dotCount < 2 ? $key : -1;
-
-				elseif(strpos($sep, ',') !== FALSE)
-					$point = ++$commaCount < 2 ? $key : -1;
-			}
-
-			$nStr = '';
-			foreach($matches[2] as $key=>$n) {
-				if($key == $point) $nStr .= '.';
-				$nStr .= $n;
-			}
-
-			return $sgn * floatval($nStr);
-		}
-
-		return $onFailValue;
-	}
 
 	/**
 	 * Generates random human readable token.
