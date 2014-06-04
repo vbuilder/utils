@@ -21,9 +21,10 @@
  * along with vBuilder FW. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace vBuilder\ArrayParser;
+namespace vBuilder\Parsers\ArrayParser;
 
 use vBuilder,
+	vBuilder\Parsers\ArrayParser,
 	vBuilder\Utils\Strings;
 
 /**

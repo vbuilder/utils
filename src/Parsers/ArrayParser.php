@@ -21,11 +21,11 @@
  * along with vBuilder FW. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace vBuilder\ArrayParser;
+namespace vBuilder\Parsers;
 
 use vBuilder\Utils\Strings,
-	vBuilder\ArrayParser\Context,
-	vBuilder\ArrayParser\KeyParser,
+	vBuilder\Parsers\ArrayParser\Context,
+	vBuilder\Parsers\ArrayParser\KeyParser,
 	Nette;
 
 /**

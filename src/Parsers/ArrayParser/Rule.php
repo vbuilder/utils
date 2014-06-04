@@ -21,45 +21,38 @@
  * along with vBuilder FW. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace vBuilder\ArrayParser;
+namespace vBuilder\Parsers\ArrayParser;
 
-use vBuilder\Utils\Strings;
+use Nette;
 
 /**
- * Static helpers for value processing
+ * Validator rule
  *
  * @author Adam Staněk (velbloud)
  * @since May 15, 2013
  */
-class Filter {
+class Rule extends Nette\Object {
 
-	public static function filterDefaultValue(Context $context, $arg) {
-		if($context->value === NULL)
-			$context->value = $arg;
+	const FILTER = 'filter';
+	const VALIDATOR = 'validator';
+	const CONDITION = 'condition';
 
-		return TRUE;
-	}
+	/** @var string */
+	public $type;
 
-	public static function filterSimplify(Context $context) {
-		if($context->value !== NULL)
-			$context->value = Strings::simplify($context->value);
+	/** @var array */
+	public $key;
 
-		return TRUE;
-	}
+	/** @var mixed */
+	public $validator;
 
-	public static function filterTrim(Context $context, $characterMask = " \t\n\r\0\x0B") {
-		if($context->value !== NULL)
-			$context->value = trim($context->value, $characterMask);
+	/** @var array */
+	public $arguments;
 
-		return TRUE;
-	}
+	/** @var bool */
+	public $isNegative = FALSE;
 
-	public static function filterSerialize(Context $context) {
-		if($context->value !== NULL)
-			$context->value = serialize($context->value);
-
-		return TRUE;
-	}
-
+	/** @var Rules  for conditions */
+	public $branch;
 
 }

@@ -1,11 +1,11 @@
 <?php
 
-use vBuilder\ArrayParser\ArrayParser,
-	vBuilder\ArrayParser\Context,
-	vBuilder\ArrayParser\KeyParser,
+use vBuilder\Parsers\ArrayParser,
+	vBuilder\Parsers\ArrayParser\Context,
+	vBuilder\Parsers\ArrayParser\KeyParser,
 	Tester\Assert;
 
-require __DIR__ . '/../bootstrap.php';
+require __DIR__ . '/../../bootstrap.php';
 
 // ArrayParser::REQUIRED
 test(function() {

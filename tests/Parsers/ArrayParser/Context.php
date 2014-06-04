@@ -1,10 +1,10 @@
 <?php
 
-use vBuilder\ArrayParser\Rule,
-	vBuilder\ArrayParser\Context,
+use vBuilder\Parsers\ArrayParser\Rule,
+	vBuilder\Parsers\ArrayParser\Context,
 	Tester\Assert;
 
-require __DIR__ . '/../bootstrap.php';
+require __DIR__ . '/../../bootstrap.php';
 
 // Get / Set value
 test(function() {

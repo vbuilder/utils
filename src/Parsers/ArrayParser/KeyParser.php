@@ -21,7 +21,7 @@
  * along with vBuilder FW. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace vBuilder\ArrayParser;
+namespace vBuilder\Parsers\ArrayParser;
 
 use Nette,
 	vBuilder\Utils\Strings;
@@ -46,9 +46,9 @@ class KeyParser extends Nette\Object implements \IteratorAggregate {
 	private $key;
 
 	public static $helperClasses = array(
-		Rule::FILTER => 'vBuilder\ArrayParser\Filter',
-		Rule::VALIDATOR => 'vBuilder\ArrayParser\Validator',
-		Rule::CONDITION => 'vBuilder\ArrayParser\Validator'
+		Rule::FILTER => 'vBuilder\Parsers\ArrayParser\Filter',
+		Rule::VALIDATOR => 'vBuilder\Parsers\ArrayParser\Validator',
+		Rule::CONDITION => 'vBuilder\Parsers\ArrayParser\Validator'
 	);
 
 	public function __construct(array $key) {
