@@ -23,7 +23,8 @@
 
 namespace vBuilder\Utils;
 
-use Nette;
+use vBuilder\Parsers\ScalarParser,
+	Nette;
 
 /**
  * String manipulation library
@@ -148,7 +149,7 @@ class Strings extends Nette\Utils\Strings {
 					$parsed[$key] = '';
 
 				} elseif($str[$i] == ',' && count($parsed) > 1) {
-					$parsed[$key] = self::parseToBool($parsed[$key], $parsed[$key]);
+					$parsed[$key] = ScalarParser::parseBool($parsed[$key], $parsed[$key]);
 
 					$key = count($parsed);
 					$parsed[$key] = '';
@@ -162,7 +163,7 @@ class Strings extends Nette\Utils\Strings {
 			}
 		}
 
-		$parsed[$key] = self::parseToBool($parsed[$key], $parsed[$key]);
+		$parsed[$key] = ScalarParser::parseBool($parsed[$key], $parsed[$key]);
 
 		return count($parsed) > 1
 				? array($parsed[0], array_slice($parsed, 1))
