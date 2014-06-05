@@ -29,4 +29,20 @@ test(function() {
 		))
 	);
 
+	Assert::same(
+		'AB',
+		Strings::sprintf('%foo$s%bar$s', array(
+			'foo' => 'A',
+			'bar' => 'B'
+		))
+	);
+
+	Assert::same(
+		'AB',
+		Strings::sprintf('%{foo}%{bar}', array(
+			'foo' => 'A',
+			'bar' => 'B'
+		))
+	);
+
 });

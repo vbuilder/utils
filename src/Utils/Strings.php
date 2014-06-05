@@ -43,7 +43,14 @@ class Strings extends Nette\Utils\Strings {
 	 */
 	public static function sprintf($str, array $args = array()) {
 		$map = array_flip(array_keys($args));
-		$str = preg_replace_callback('/(^|[^%])%([a-zA-Z0-9_-]+)(\$)?/', function ($m) use ($map) {
+		$str = preg_replace_callback('/(.?)%([a-zA-Z0-9_-]+|{[^}]+})(\$)?/', function ($m) use ($map) {
+
+			// Escaping
+			if($m[1] == '%') return $m[0];
+
+			// Named placeholders in brackets
+			if(strncmp($m[2], '{', 1) === 0)
+				$m[2] = substr($m[2], 1, -1);
 
 			// Standard mapping
 			// @see http://www.php.net/manual/en/function.sprintf.php
