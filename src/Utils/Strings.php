@@ -29,6 +29,8 @@ use vBuilder\Parsers\ScalarParser,
 /**
  * String manipulation library
  *
+ * @package vBuilder.Utils
+ *
  * @author Adam Staněk (velbloud)
  * @since Feb 7, 2011
  */
@@ -102,6 +104,8 @@ class Strings extends Nette\Utils\Strings {
 	 * Creates parametrized string
 	 * Ex. something:123,abcd,a b aa \, d,something=true
 	 *
+	 * @see Strings::parseParametrizedString()
+	 *
 	 * @param string base string
 	 * @param array of parameters
 	 * @return string
@@ -130,7 +134,12 @@ class Strings extends Nette\Utils\Strings {
 
 	/**
 	 * Parses string coded by Strings::intoParameterizedString
-	 * Usage: list($key, $parameters) = Strings::parseParametrizedString($str);
+	 *
+	 * <code>
+	 * list($key, $parameters) = Strings::parseParametrizedString($str);
+	 * </code>
+	 *
+	 * @see Strings::intoParameterizedString()
 	 *
 	 * @param string
 	 * @return array ($key, array($parameters))

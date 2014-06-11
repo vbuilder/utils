@@ -33,6 +33,8 @@ use vBuilder\Utils\Strings,
  *   complex XML / HTML parsers. It is rather library of simple helpers
  *   for gathering HTML tags from possibly invalid code.
  *
+ * @package vBuilder.Utils
+ *
  * @author Adam Staněk (velbloud)
  * @since Jun 3, 2014
  */

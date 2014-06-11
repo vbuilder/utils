@@ -28,6 +28,8 @@ use Nette;
 /**
  * Metadata file storage
  *
+ * @package vBuilder.Utils
+ *
  * @author Adam Staněk (velbloud)
  * @since May 25, 2014
  */

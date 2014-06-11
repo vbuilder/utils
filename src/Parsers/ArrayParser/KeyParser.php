@@ -31,6 +31,8 @@ use Nette,
  *
  * Inspired by Nette\Forms\Rules by David Grudl
  *
+ * @package vBuilder.Utils
+ *
  * @author Adam Staněk (velbloud)
  * @since May 15, 2013
  */

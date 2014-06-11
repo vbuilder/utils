@@ -28,6 +28,8 @@ use vBuilder\Utils\Strings;
 /**
  * Static helpers for value processing
  *
+ * @package vBuilder.Utils
+ *
  * @author Adam Staněk (velbloud)
  * @since May 15, 2013
  */

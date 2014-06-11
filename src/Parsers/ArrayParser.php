@@ -44,6 +44,8 @@ use vBuilder\Utils\Strings,
  * $parsed = $parser->parse($data, $errors);
  * </code>
  *
+ * @package vBuilder.Utils
+ *
  * @author Adam Staněk (velbloud)
  * @since May 15, 2013
  */

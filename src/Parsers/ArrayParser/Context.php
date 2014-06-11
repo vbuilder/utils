@@ -28,6 +28,8 @@ use Nette;
 /**
  * Object for holding parser context
  *
+ * @package vBuilder.Utils
+ *
  * @author Adam Staněk (velbloud)
  * @since May 16, 2013
  */

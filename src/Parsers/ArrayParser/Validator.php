@@ -30,6 +30,8 @@ use vBuilder,
 /**
  * Static helpers for value validation
  *
+ * @package vBuilder.Utils
+ *
  * @author Adam Staněk (velbloud)
  * @since May 15, 2013
  */

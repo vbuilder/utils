@@ -26,6 +26,8 @@ namespace vBuilder\Parsers;
 /**
  * Parser library for scalar types
  *
+ * @package vBuilder.Utils
+ *
  * @author Adam Staněk (velbloud)
  * @since Jun 3, 2014
  */

@@ -29,6 +29,8 @@ use vBuilder,
 /**
  * File system routines
  *
+ * @package vBuilder.Utils
+ *
  * @author Adam Staněk (velbloud)
  * @since Oct 22, 2011
  */
@@ -39,6 +41,8 @@ class FileSystem {
 	 *
 	 * 'a/b/c'   => ['a', 'b', 'c']
 	 * 'a\\/b/c' => ['a\b', 'c']
+	 *
+	 * @uses Strings::splitWithEscape()
 	 *
 	 * @param string path
 	 * @param char directory separator
@@ -142,6 +146,8 @@ class FileSystem {
 
 	/**
 	 * Creates all directories in the file path
+	 *
+	 * @uses FileSystem::createDirIfNotExists()
 	 *
 	 * @param string file path
 	 *

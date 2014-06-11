@@ -29,6 +29,8 @@ use vBuilder\Utils\Strings,
 /**
  * PHP parsing helpers
  *
+ * @package vBuilder.Utils
+ *
  * @author Adam Staněk (velbloud)
  * @since Jun 3, 2014
  */

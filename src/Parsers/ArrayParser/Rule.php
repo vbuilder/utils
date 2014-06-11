@@ -28,6 +28,8 @@ use Nette;
 /**
  * Validator rule
  *
+ * @package vBuilder.Utils
+ *
  * @author Adam Staněk (velbloud)
  * @since May 15, 2013
  */
