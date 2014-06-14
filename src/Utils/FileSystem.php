@@ -24,7 +24,8 @@
 namespace vBuilder\Utils;
 
 use vBuilder,
-		Nette;
+	Nette,
+	InvalidArgumentException;
 
 /**
  * File system routines
@@ -37,11 +38,15 @@ use vBuilder,
 class FileSystem {
 
 	/**
-	 * Returns parsed path tokens without escape characters
+	 * Returns parsed path components without escape characters.
 	 *
-	 * 'a/b/c'   => ['a', 'b', 'c']
-	 * 'a\\/b/c' => ['a\b', 'c']
+	 * <code>
+	 * FileSystem::getPathComponents('a/b/c'); // returns array('a', 'b', 'c')
+	 * FileSystem::getPathComponents('a/b/c/'); // returns array('a', 'b', 'c')
+	 * FileSystem::getPathComponents('/a/b/c'); // returns array('', 'a', 'b', 'c')
+	 * </code>
 	 *
+	 * @see FileSystem::joinPathComponents()
 	 * @uses Strings::splitWithEscape()
 	 *
 	 * @param string path
@@ -49,88 +54,165 @@ class FileSystem {
 	 *
 	 * @return string
 	 */
-	static function getPathTokens($path, $separator = DIRECTORY_SEPARATOR) {
-		return Strings::splitWithEscape($path, $separator, $separator == '\\' ? '\\\\' : '\\', false);
-	}
+	static function getPathComponents($path, $separator = DIRECTORY_SEPARATOR) {
+		if($path == '') return array();
 
-	/**
-	 * Returns escaped path token
-	 *
-	 * @param string path
-	 * @param char directory separator
-	 *
-	 * @return string
-	 */
-	static function escapePath($pathToken, $separator = DIRECTORY_SEPARATOR) {
-		$escape = $separator == '\\' ? '\\\\' : '\\';
-		return str_replace(array($escape, $separator), array($escape . $escape, $escape . $separator), $pathToken);
-	}
+		$tokens = Strings::splitWithEscape($path, $separator, $separator == '\\' ? '\\\\' : '\\', false);
 
-	/**
-	 * Resolves ../ and ./ tokens in path
-	 *
-	 * @note Function works only with given path and does not actually check FS.
-	 *
-	 * @param string path
-	 * @param char directory separator
-	 * @return string
-	 */
-	static function normalizePath($path, $separator = DIRECTORY_SEPARATOR) {
-		$tokens = self::getPathTokens($path, $separator);
-
-		$out=array();
-		foreach($tokens as $i => $token){
-			if($token == '' || $token == '.') continue;
-			if($token == '..' && count($out) > 0 && end($out) != '..') array_pop($out);
-			else $out[]= self::escapePath($token);
+		// We need to ignore all empty values except for first
+		$components = array();
+		foreach($tokens as $t) {
+			if($t == '' && count($components)) continue;
+			$components[] = $t;
 		}
 
-		return ($path[0] == '/' ? '/' : '') . join('/', $out);
+		return $components;
 	}
 
 	/**
-	 * Creates relative path
+	 * Joins path components into path string.
+	 *
+	 * @see FileSystem::joinPathComponents()
+	 *
+	 * @param string[] path components
+	 * @param char directory separator
+	 *
+	 * @return string
+	 */
+	static function joinPathComponents(array $pathComponents, $separator = DIRECTORY_SEPARATOR) {
+		$path = '';
+
+		foreach($pathComponents as $c) {
+			if($c != '')
+				$path .= $separator . self::escapePathComponent($c, $separator);
+		}
+
+		return (strlen($path) && $pathComponents[0] != '')
+			? substr($path, strlen($separator))
+			: $path;
+	}
+
+	/**
+	 * Returns escaped path component.
+	 *
+	 * @param string path
+	 * @param char directory separator
+	 *
+	 * @return string
+	 */
+	static function escapePathComponent($pathComponent, $separator = DIRECTORY_SEPARATOR) {
+		$escape = $separator == '\\' ? '\\\\' : '\\';
+		return str_replace(array($escape, $separator), array($escape . $escape, $escape . $separator), $pathComponent);
+	}
+
+	/**
+	 * Resolves ../ and ./ components in given path.
 	 *
 	 * @note Function works only with given path and does not actually check FS.
 	 *
-	 * @param string from (base path)
-	 * @param string to (target path)
+	 * <code>
+	 * FileSystem::normalizePath('a/b/../c'); // returns 'a/c'
+	 * FileSystem::normalizePath(array('a', 'b', '..', 'c'), FALSE); // returns array('a', 'c')
+	 * </code>
+	 *
+	 * @param string|array path
+	 * @param char|FALSE directory separator
+	 *
+	 * @return string|array depending on input
+	 */
+	static function normalizePath($path, $separator = DIRECTORY_SEPARATOR) {
+
+		if($separator === FALSE && !is_array($path))
+			throw new InvalidArgumentException('Path has to be an array of components if $separator === FALSE');
+
+		$tokens = is_array($path) ? $path : self::getPathComponents($path, $separator);
+
+		$out = array();
+		foreach($tokens as $i => $token){
+			if($token == '.') continue;
+			if($token == '..' && count($out) > 0 && end($out) != '..') array_pop($out);
+			else $out[] = $token;
+		}
+
+		return $separator === FALSE
+			? $out
+			: self::joinPathComponents($out, $separator);
+	}
+
+	/**
+	 * Creates relative path.
+	 *
+	 * @note Function works only with given path and does not actually check FS.
+	 *
+	 * <code>
+	 * FileSystem::getRelativePath('a/b/c', 'a/d'); // returns '../../d'
+	 * </code>
+	 *
+	 * @param string|array from (current path)
+	 * @param string|array to (target path)
 	 * @param char directory separator
+	 * @param bool return path components instead of string?
 	 * @return string
 	 */
 	static function getRelativePath($from, $to, $separator = DIRECTORY_SEPARATOR) {
 
-		$from = rtrim($from, $separator) . $separator;
-		$to = rtrim($to, $separator) . $separator;
+		// Get components
+		if(!is_array($from)) {
+			if($separator === FALSE)
+				throw new InvalidArgumentException('Path has to be an array of components if $separator === FALSE');
 
-		$from		= self::getPathTokens($from, $separator);
-		$to			= self::getPathTokens($to, $separator);
-		$relPath	= $to;
+			$from = self::getPathComponents($from, $separator);
+		}
+
+		if(!is_array($to)) {
+			if($separator === FALSE)
+				throw new InvalidArgumentException('Path has to be an array of components if $separator === FALSE');
+
+			$to = self::getPathComponents($to, $separator);
+		}
+
+		// Get components of normalized paths
+		$from		= self::normalizePath($from, FALSE);
+		$to			= self::normalizePath($to, FALSE);
+
+		$matched 	= count($to) == 0 ? 1 : 0;
 
 		foreach($from as $depth => $dir) {
-			// find first non-matching dir
-			if($dir === $to[$depth]) {
-				// ignore this directory
-				array_shift($relPath);
-			} else {
-				// get number of remaining dirs to $from
-				$remaining = count($from) - $depth;
+
+			// Find first non-matching dir
+			if(count($to) && $dir === $to[0] && $matched === $depth) {
+
+				// Ignore this directory
+				array_shift($to);
+				$matched++;
+
+			} elseif($matched) {
+
+				// Get number of remaining dirs to $from
+				$remaining = count($from) - $depth + 1;
 				if($remaining > 1) {
-					// add traversals up to first matching dir
-					$padLength = (count($relPath) + $remaining - 1) * -1;
-					$relPath = array_pad($relPath, $padLength, '..');
-					break;
+
+					// Add traversals up to first matching dir
+					$padLength = (count($to) + $remaining - 1) * -1;
+					$to = array_pad($to, $padLength, '..');
+
+
 				} else {
-					$relPath[0] = '.' . $separator . $relPath[0];
+					// If you want your path to start with ./
+					// array_unshift($to, '.');
 				}
+
+				break;
 			}
 		}
 
-		return rtrim(implode($separator, $relPath), $separator);
+		return $separator === FALSE
+			? $to
+			: self::joinPathComponents($to, $separator);
 	}
 
 	/**
-	 * Creates directory (all of them if necessary) if directory does not exist
+	 * Creates directory (all of them if necessary) if directory does not exist.
 	 *
 	 * @param string directory path
 	 * @param string creation mode
@@ -145,7 +227,7 @@ class FileSystem {
 	}
 
 	/**
-	 * Creates all directories in the file path
+	 * Creates all parent directories in the file path.
 	 *
 	 * @uses FileSystem::createDirIfNotExists()
 	 *
@@ -159,7 +241,7 @@ class FileSystem {
 	}
 
 	/**
-	 * Finds files matching given base path while trying multiple extensions
+	 * Finds files matching given base path while trying multiple extensions.
 	 *
 	 * @param string absolute base path (file name path without extension)
 	 * @param array of extensions (if empty all possible extensions will be matched)
@@ -192,7 +274,7 @@ class FileSystem {
 	}
 
 	/**
-	 * Tries to delete all of given files
+	 * Tries to delete all of given files.
 	 *
 	 * @param array of absolute file paths
 	 *
