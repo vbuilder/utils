@@ -67,4 +67,10 @@ test(function() {
 		FileSystem::getRelativePath('/a/b/c', 'a/d', '/')
 	);
 
+	// Relative from and absolute target
+	Assert::same(
+		'/a/d',
+		FileSystem::getRelativePath('a/b/c', '/a/d', '/')
+	);
+
 });
