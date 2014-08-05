@@ -24,7 +24,8 @@
 namespace vBuilder\Utils;
 
 use vBuilder\Parsers\ScalarParser,
-	Nette;
+	Nette,
+	Nette\InvalidArgumentException;
 
 /**
  * String manipulation library
@@ -225,21 +226,21 @@ class Strings extends Nette\Utils\Strings {
 	 * @param bool ignore empty tokens?
 	 *
 	 * @return string
-	 * @throws Nette\InvalidArgumentException
+	 * @throws InvalidArgumentException
 	 */
 	public static function splitWithEscape($str, $separator = '/', $escape = '\\', $ignoreEmpty = true) {
 
 		if(!is_string($str))
-			throw new Nette\InvalidArgumentException("First argument has to be string");
+			throw new InvalidArgumentException("First argument has to be string");
 
 		if(!is_string($separator))
-			throw new Nette\InvalidArgumentException("Second argument has to be string");
+			throw new InvalidArgumentException("Second argument has to be string");
 
 		if(!is_string($escape))
-			throw new Nette\InvalidArgumentException("Second argument has to be string");
+			throw new InvalidArgumentException("Second argument has to be string");
 
 		if($separator == $escape)
-			throw new Nette\InvalidArgumentException("Separator cannot be equal to escape");
+			throw new InvalidArgumentException("Separator cannot be equal to escape");
 
 		// ----
 

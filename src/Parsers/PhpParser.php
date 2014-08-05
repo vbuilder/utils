@@ -23,8 +23,7 @@
 
 namespace vBuilder\Parsers;
 
-use vBuilder\Utils\Strings,
-	Nette;
+use vBuilder\Utils\Strings;
 
 /**
  * PHP parsing helpers

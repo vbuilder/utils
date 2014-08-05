@@ -23,7 +23,8 @@
 
 namespace vBuilder\Parsers\ArrayParser;
 
-use Nette,
+use Nette\Object,
+	Nette\InvalidArgumentException,
 	vBuilder\Utils\Strings;
 
 /**
@@ -36,7 +37,7 @@ use Nette,
  * @author Adam Staněk (velbloud)
  * @since May 15, 2013
  */
-class KeyParser extends Nette\Object implements \IteratorAggregate {
+class KeyParser extends Object implements \IteratorAggregate {
 
 	/** @var Rule[] */
 	private $rules = array();
@@ -214,7 +215,7 @@ class KeyParser extends Nette\Object implements \IteratorAggregate {
 
 		if (!is_callable($this->getCallback($rule))) {
 			$validator = is_scalar($rule->validator) ? "'$rule->validator'" : '';
-			throw new Nette\InvalidArgumentException("Unknown callback $validator for key ['" . implode($rule->key, "', '") . "'].");
+			throw new InvalidArgumentException("Unknown callback $validator for key ['" . implode($rule->key, "', '") . "'].");
 		}
 	}
 

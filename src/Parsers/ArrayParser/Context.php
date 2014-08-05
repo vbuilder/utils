@@ -23,7 +23,7 @@
 
 namespace vBuilder\Parsers\ArrayParser;
 
-use Nette;
+use Nette\Object;
 
 /**
  * Object for holding parser context
@@ -33,7 +33,7 @@ use Nette;
  * @author Adam Staněk (velbloud)
  * @since May 16, 2013
  */
-class Context extends Nette\Object {
+class Context extends Object {
 
 	/** @var array */
 	private $data;

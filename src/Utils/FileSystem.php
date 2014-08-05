@@ -24,8 +24,9 @@
 namespace vBuilder\Utils;
 
 use vBuilder,
-	Nette,
-	InvalidArgumentException;
+	Nette\Utils\Finder,
+	Nette\InvalidArgumentException,
+	Nette\IOException;
 
 /**
  * File system routines
@@ -217,12 +218,12 @@ class FileSystem {
 	 * @param string directory path
 	 * @param string creation mode
 	 *
-	 * @throws Nette\IOException if cannot create directory
+	 * @throws IOException if cannot create directory
 	 */
 	static function createDirIfNotExists($dirpath, $mode = 0770) {
 		if(!is_dir($dirpath)) {
 			if(@mkdir($dirpath, $mode, true) === false) // @ - is escalated to exception
-				throw new Nette\IOException("Cannot create directory '".$dirpath."'");
+				throw new IOException("Cannot create directory '".$dirpath."'");
 		}
 	}
 
@@ -233,7 +234,7 @@ class FileSystem {
 	 *
 	 * @param string file path
 	 *
-	 * @throws Nette\IOException if cannot create directory
+	 * @throws IOException if cannot create directory
 	 */
 	static function createFilePath($filePath) {
 		$dirpath = pathinfo($filePath, PATHINFO_DIRNAME);
@@ -252,7 +253,7 @@ class FileSystem {
 		$pi = pathinfo($basePath);
 		$files = array();
 
-		foreach(Nette\Utils\Finder::findFiles($pi['basename'] . '.*')->in($pi['dirname']) as $file) {
+		foreach(Finder::findFiles($pi['basename'] . '.*')->in($pi['dirname']) as $file) {
 			$matched = count($extensions) == 0;
 			foreach($extensions as $curr) {
 				// Podporovano az od PHP 5.3.6
@@ -279,7 +280,7 @@ class FileSystem {
 	 * @param array of absolute file paths
 	 *
 	 * @return int number of deleted files
-	 * @throws Nette\IOException if file has been found, but can't unlink it during the permission violation
+	 * @throws IOException if file has been found, but can't unlink it during the permission violation
 	 */
 	static function tryDeleteFiles(array $files) {
 		$success = 0;
@@ -287,7 +288,7 @@ class FileSystem {
 		foreach($files as $path) {
 			if(file_exists($path)) {
 				if(!unlink($path))
-					throw new Nette\IOException("Failed to delete " . var_export($path, true));
+					throw new IOException("Failed to delete " . var_export($path, true));
 
 				$success++;
 			}

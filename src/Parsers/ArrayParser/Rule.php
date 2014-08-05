@@ -23,7 +23,7 @@
 
 namespace vBuilder\Parsers\ArrayParser;
 
-use Nette;
+use Nette\Object;
 
 /**
  * Validator rule
@@ -33,7 +33,7 @@ use Nette;
  * @author Adam Staněk (velbloud)
  * @since May 15, 2013
  */
-class Rule extends Nette\Object {
+class Rule extends Object {
 
 	const FILTER = 'filter';
 	const VALIDATOR = 'validator';

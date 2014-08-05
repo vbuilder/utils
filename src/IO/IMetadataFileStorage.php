@@ -23,8 +23,6 @@
 
 namespace vBuilder\IO;
 
-use Nette;
-
 /**
  * Metadata file storage
  *

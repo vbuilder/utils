@@ -26,7 +26,8 @@ namespace vBuilder\Parsers;
 use vBuilder\Utils\Strings,
 	vBuilder\Parsers\ArrayParser\Context,
 	vBuilder\Parsers\ArrayParser\KeyParser,
-	Nette;
+	Nette\Utils\ArrayHash,
+	Nette\InvalidArgumentException;
 
 /**
  * Validator
@@ -49,7 +50,7 @@ use vBuilder\Utils\Strings,
  * @author Adam Staněk (velbloud)
  * @since May 15, 2013
  */
-class ArrayParser extends Nette\ArrayHash {
+class ArrayParser extends ArrayHash {
 
 	/** Filters */
 	const DEFAULT_VALUE = ':filterDefaultValue';
@@ -145,7 +146,7 @@ class ArrayParser extends Nette\ArrayHash {
 				break;
 
 			default:
-				throw new Nette\InvalidArgumentException("Invalid preset '$preset'");
+				throw new InvalidArgumentException("Invalid preset '$preset'");
 		}
 
 		return $this[$key];
@@ -159,7 +160,7 @@ class ArrayParser extends Nette\ArrayHash {
 	 */
 	public function offsetSet($index, $rule) {
 		if(!$rule instanceof KeyParser) {
-			throw new Nette\InvalidArgumentException('Argument must be ' . __NAMESPACE__ . 'ArrayParser\\KeyParser descendant.');
+			throw new InvalidArgumentException('Argument must be ' . __NAMESPACE__ . 'ArrayParser\\KeyParser descendant.');
 		}
 
 		parent::offsetSet($index, $rule);

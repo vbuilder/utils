@@ -24,7 +24,7 @@
 namespace vBuilder\Parsers;
 
 use vBuilder\Utils\Strings,
-	Nette;
+	Nette\InvalidArgumentException;
 
 /**
  * HTML parsing helpers
@@ -70,7 +70,7 @@ class HtmlParser {
 			$re_name = '(/?' . preg_quote($tag, '#') . ')';
 
 		else
-			throw new Nette\InvalidArgumentException("Invalid tag name");
+			throw new InvalidArgumentException("Invalid tag name");
 
 		if($re_name == '') return array();
 

@@ -23,8 +23,9 @@
 
 namespace vBuilder\IO;
 
-use Nette,
-	Nette\Utils\SafeStream;
+use Nette\Object,
+	Nette\Utils\SafeStream,
+	Nette\InvalidArgumentException;
 
 /**
  * PHP file storage
@@ -34,7 +35,7 @@ use Nette,
  * @author Adam Staněk (velbloud)
  * @since May 25, 2014
  */
-class PhpFileStorage extends Nette\Object implements IMetadataFileStorage {
+class PhpFileStorage extends Object implements IMetadataFileStorage {
 
 	/** Revision of job files (1 - 255) */
 	const REVISION = 1;
@@ -109,7 +110,7 @@ class PhpFileStorage extends Nette\Object implements IMetadataFileStorage {
 	 * @param array
 	 * @param mixed data
 	 * @return string
-	 * @throws Nette\InvalidArgumentException if metadata are too large
+	 * @throws InvalidArgumentException if metadata are too large
 	 */
 	protected function createData(array $meta, $data) {
 
@@ -117,7 +118,7 @@ class PhpFileStorage extends Nette\Object implements IMetadataFileStorage {
 		$metaLen = strlen($meta);
 
 		if($metaLen > static::META_MAX_SIZE)
-			throw new Nette\InvalidArgumentException("Maximum metadata length exceeded");
+			throw new InvalidArgumentException("Maximum metadata length exceeded");
 
 		return self::getHeadStart()
 			. str_pad(dechex($metaLen), self::getLengthChars(), '0', STR_PAD_LEFT)
