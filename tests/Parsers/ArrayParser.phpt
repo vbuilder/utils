@@ -199,7 +199,23 @@ test(function() {
 
 });
 
+// Lists
+test(function() {
+	$nestedParser = new ArrayParser;
+	$nestedParser->addKey(ArrayParser::OTHER_KEYS)
+		->addRule(ArrayParser::ONE_OF, array('A', 'B', 'C'));
 
+	$itemParser  = new ArrayParser;
+	$itemParser->addKey('items')
+		->addRule(ArrayParser::ARRAY_OF_STRUCTURE, $nestedParser);
+
+	$data = array(
+		'items' => array('A', 'B', 'C')
+	);
+
+	$parsed = $itemParser->parse($data, $errors);
+	Assert::same($data, $parsed);
+});
 
 
 

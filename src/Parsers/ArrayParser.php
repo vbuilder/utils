@@ -75,6 +75,10 @@ class ArrayParser extends ArrayHash {
 	const OPTIONAL_STRING = 'optionalString';
 	/**/
 
+	/** Special keys */
+	const OTHER_KEYS = '__other__';
+	/**/
+
 	public function parse(array $data, &$errors = array()) {
 
 		/// @todo add translator
@@ -96,23 +100,26 @@ class ArrayParser extends ArrayHash {
 		$keys = is_array($context->value) ? array_flip(array_keys($context->value)) : array();
 
 		foreach($this as $k => $rules) {
-			unset($keys[$k]);
+			if($k != self::OTHER_KEYS)
+				unset($keys[$k]);
 
 			if(!$rules->parse($context))
 				$success = FALSE;
 		}
 
-		foreach($keys as $k => $v) {
-			$success = FALSE;
-			$key = $baseKey;
-			$key[] = $k;
-			$context->errors[] = array(
-				$key,
-				Strings::sprintf(
-					'Unexpected parameter %key.',
-					array('key' => $context->getPrintableKey($key))
-				)
-			);
+		if(!isset($this[self::OTHER_KEYS])) {
+			foreach($keys as $k => $v) {
+				$success = FALSE;
+				$key = $baseKey;
+				$key[] = $k;
+				$context->errors[] = array(
+					$key,
+					Strings::sprintf(
+						'Unexpected parameter %key.',
+						array('key' => $context->getPrintableKey($key))
+					)
+				);
+			}
 		}
 
 		$context->baseKey = $oldBaseKey;
@@ -124,7 +131,7 @@ class ArrayParser extends ArrayHash {
 	public function addKey($key, $preset = NULL) {
 
 		if(!isset($this[$key]))
-			$this[$key] = new KeyParser(array($key));
+			$this[$key] = new KeyParser($key != self::OTHER_KEYS ? array($key) : array());
 
 		switch($preset) {
 			case NULL:
